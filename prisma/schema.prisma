@@ -1,0 +1,255 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  Customer
+  Vendor
+  Admin
+}
+
+model User {
+  id                    Int                      @id @default(autoincrement())
+  fullName              String
+  email                 String                   @unique
+  password              String
+  isVerifiedAccount     Boolean                  @default(false)
+  verifiedDate          DateTime?
+  createdAt             DateTime                 @default(now())
+  role                  UserRole
+  credit                Float                    @default(0)
+  lastLoginDate         DateTime?
+  addresses             UserAddress[]            @relation("user_address_relation")
+  currentAddressId      Int?                     @unique
+  currentAddress        UserAddress?             @relation(fields: [currentAddressId], references: [id], name: "current_user_address_relation")
+  productsVerifications Product[]                @relation("verified_by_user_relation")
+  products              Product[]                @relation("products_created_relation")
+  whishlists            ProductWhishlist[]       @relation("user_whish_list_relation")
+  historyViews          UserProductHistoryView[] @relation("user_history_view_relation")
+  carts                 Cart[]                   @relation("carts_user_relation")
+  orders                Order[]                  @relation("order_user_relation")
+  vendorOrders          Order[]                  @relation("order_user_seller_relation")
+  payments              Payment[]                @relation("user_payment_relation")
+  transactions          Transaction[]            @relation("transaction_user_relation")
+  returnedOrders        ReturnedOrder[]          @relation("_returned_orders_customer")
+
+  @@index([email])
+  @@map("_users")
+}
+
+model UserAddress {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  address             String
+  postalCode          String
+  latitude            Float
+  longitude           Float
+  isActive            Boolean
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  userId              Int
+  user                User     @relation(fields: [userId], references: [id], name: "user_address_relation")
+  userSelectedAddress User?    @relation("current_user_address_relation")
+  orders              Order[]  @relation("order_user_address_relation")
+
+  @@map("_user_addresses")
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  icon        String
+  isPublished Boolean   @default(false)
+  isVerified  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  products    Product[] @relation("product_category_relation")
+
+  @@map("_categories")
+}
+
+model Product {
+  id             Int                      @id @default(autoincrement())
+  name           String
+  isPublished    Boolean                  @default(false)
+  isVerified     Boolean                  @default(false)
+  verifiedDate   DateTime?
+  verifiedById   Int?
+  verifiedByUser User?                    @relation(fields: [verifiedById], references: [id], name: "verified_by_user_relation")
+  createdAt      DateTime                 @default(now())
+  createdById    Int
+  createdBy      User                     @relation(fields: [createdById], references: [id], name: "products_created_relation")
+  basePrice      Float
+  categoryId     Int
+  category       Category                 @relation(fields: [categoryId], references: [id], name: "product_category_relation")
+  description    String
+  images         String[]                 @default([])
+  previewImage   String
+  meta           Json
+  whishlists     ProductWhishlist[]       @relation("product_whish_list_relation")
+  historyView    UserProductHistoryView[] @relation("product_history_view_relation")
+  carts          Cart[]                   @relation("carts_product_relation")
+
+  @@map("_products")
+}
+
+enum ProductPriceType {
+  Color
+}
+
+model ProductPriceItem {
+  id        Int              @id @default(autoincrement())
+  title     String
+  value     String
+  price     Float
+  isVisible Boolean
+  type      ProductPriceType
+
+  carts Cart[] @relation("cart_price_item_relation")
+
+  @@map("_product_price_items")
+}
+
+model ProductWhishlist {
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], name: "product_whish_list_relation")
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], name: "user_whish_list_relation")
+
+  @@id([productId, userId])
+}
+
+model UserProductHistoryView {
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], name: "product_history_view_relation")
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], name: "user_history_view_relation")
+
+  count Int @default(1)
+
+  @@id([productId, userId])
+}
+
+model Cart {
+  id Int @id @default(autoincrement())
+
+  customerId Int
+  customer   User @relation(fields: [customerId], references: [id], name: "carts_user_relation")
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], name: "carts_product_relation")
+
+  priceItemId Int
+  priceItem   ProductPriceItem @relation(fields: [priceItemId], references: [id], name: "cart_price_item_relation")
+
+  createdAt DateTime @default(now())
+  quantity  Int
+
+  orderId Int?
+  order   Order? @relation(fields: [orderId], references: [id], name: "cart_order_relation")
+
+  @@map("_carts")
+}
+
+enum OrderStatus {
+  Processing
+  Shipped
+  OutOfDelivery
+  Delivered
+}
+
+model Order {
+  id              Int             @id @default(autoincrement())
+  carts           Cart[]          @relation("cart_order_relation")
+  userId          Int
+  user            User            @relation(fields: [userId], references: [id], name: "order_user_relation")
+  totalPrice      Float
+  finalPrice      Float
+  discountAmount  Float?          @default(0)
+  userAddressId   Int
+  userAddress     UserAddress     @relation(fields: [userAddressId], references: [id], name: "order_user_address_relation")
+  phoneNumber     String
+  createdAt       DateTime        @default(now())
+  status          OrderStatus
+  statusChangedAt DateTime
+  deliveryCode    String          @unique
+  sellerId        Int
+  seller          User            @relation(fields: [sellerId], references: [id], name: "order_user_seller_relation")
+  payments        Payment[]       @relation("order_payment_relation")
+  returnedOrders  ReturnedOrder[] @relation("returned_orders_relation")
+
+  @@index([deliveryCode])
+  @@map("_orders")
+}
+
+enum PaymentStatus {
+  Payed
+  NotPayed
+  Canceled
+}
+
+model Payment {
+  id          Int           @id @default(autoincrement())
+  link        String
+  payedAt     DateTime?
+  createdAt   DateTime      @default(now())
+  status      PaymentStatus
+  userId      Int
+  user        User          @relation(fields: [userId], references: [id], name: "user_payment_relation")
+  orderId     Int
+  order       Order         @relation(fields: [orderId], references: [id], name: "order_payment_relation")
+  amount      Float
+  transaction Transaction?  @relation("transaction_payment_relation")
+
+  @@map("_payments")
+}
+
+enum TransactionStatus {
+  Deposit
+  Withdraw
+  Revenue
+  Return
+}
+
+model Transaction {
+  id         Int               @id @default(autoincrement())
+  createdAt  DateTime          @default(now())
+  status     TransactionStatus
+  authority  String
+  refId      String
+  amount     Float
+  paymentId  Int               @unique
+  payment    Payment           @relation(fields: [paymentId], references: [id], name: "transaction_payment_relation")
+  customerId Int
+  customer   User              @relation(fields: [customerId], references: [id], name: "transaction_user_relation")
+
+  @@map("_transactions")
+}
+
+enum ReturnedOrderStatus {
+  Pending
+  Seen
+  Processed
+  Accept
+  Reject
+}
+
+model ReturnedOrder {
+  id              Int                 @id @default(autoincrement())
+  createdAt       DateTime            @default(now())
+  status          ReturnedOrderStatus
+  statusChangedAt DateTime
+  reason          String
+  orderId         Int
+  order           Order               @relation(fields: [orderId], references: [id], name: "returned_orders_relation")
+  customerId      Int
+  customer        User                @relation(fields: [customerId], references: [id], name: "_returned_orders_customer")
+
+  @@map("_returned_orders")
+}
