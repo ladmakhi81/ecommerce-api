@@ -9,8 +9,9 @@ const bootstrap = async () => {
 
   app.enableCors();
 
-  await app.listen(port, () => {
-    console.log(`the server is running: ${app.getUrl()}`);
+  await app.listen(port, async () => {
+    const appURL = await app.getUrl();
+    console.log(`the server is running: ${appURL}`);
   });
 };
 
