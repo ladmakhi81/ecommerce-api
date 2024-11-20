@@ -6,12 +6,14 @@ import {
 import { CreateUserDTO, UpdateUserByIdDTO } from './dtos';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { HashService } from 'src/common/hash/hash.service';
+import { TokenService } from 'src/common/token/token.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly hashService: HashService,
+    private readonly tokenService: TokenService,
   ) {}
 
   async createUser(dto: CreateUserDTO) {
@@ -20,12 +22,14 @@ export class UserService {
       throw new ConflictException('User Duplicated Email Address');
     }
     const passwordHashed = await this.hashService.encode(dto.password);
+    const verificationCode = this.tokenService.generateVerificationToken();
     return this.prismaService.user.create({
       data: {
         email: dto.email,
         password: passwordHashed,
         fullName: dto.fullName,
         role: dto.role,
+        verifiedToken: verificationCode,
       },
     });
   }

@@ -3,6 +3,7 @@ import { DecodeAuthTokenDTO } from './dtos';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class TokenService {
@@ -18,6 +19,10 @@ export class TokenService {
     await this._resetSessionsByUserId(dto.userId);
     await this._createSession(dto.userId, token);
     return token;
+  }
+
+  generateVerificationToken() {
+    return randomBytes(10).toString('hex');
   }
 
   private _createSession(userId: number, token: string) {

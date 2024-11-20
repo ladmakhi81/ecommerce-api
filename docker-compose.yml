@@ -9,3 +9,8 @@ services:
       - POSTGRES_USERNAME=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=ecommerce_db
+  redis_db:
+    container_name: redis_db
+    image: redis:latest
+    ports:
+      - 6379:6379

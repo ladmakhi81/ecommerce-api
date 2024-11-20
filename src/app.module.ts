@@ -14,6 +14,9 @@ import { ReturnedOrderModule } from './returned-order/returned-order.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { HistoryModule } from './history/history.module';
 import { CommonModule } from './common/common.module';
+import { NotificationModule } from './notification/notification.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [
@@ -32,6 +35,9 @@ import { CommonModule } from './common/common.module';
     WishlistModule,
     HistoryModule,
     CommonModule,
+    NotificationModule,
+    EventEmitterModule.forRoot(),
+    QueueModule,
   ],
 })
 export class AppModule {}
