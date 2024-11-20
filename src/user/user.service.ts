@@ -40,12 +40,12 @@ export class UserService {
       data = {
         isVerifiedAccount: true,
         verifiedDate: new Date(),
-        verifiedToken: undefined,
+        verifiedToken: null,
       };
     } else {
       data = {
         isVerifiedAccount: false,
-        verifiedDate: undefined,
+        verifiedDate: null,
         verifiedToken,
       };
     }
