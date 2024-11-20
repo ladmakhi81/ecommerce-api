@@ -24,6 +24,7 @@ CREATE TABLE "_users" (
     "password" TEXT NOT NULL,
     "isVerifiedAccount" BOOLEAN NOT NULL DEFAULT false,
     "verifiedDate" TIMESTAMP(3),
+    "verifiedToken" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "role" "UserRole" NOT NULL,
     "credit" DOUBLE PRECISION NOT NULL DEFAULT 0,
@@ -31,6 +32,14 @@ CREATE TABLE "_users" (
     "currentAddressId" INTEGER,
 
     CONSTRAINT "_users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "_user_sessions" (
+    "userId" INTEGER NOT NULL,
+    "token" TEXT NOT NULL,
+
+    CONSTRAINT "_user_sessions_pkey" PRIMARY KEY ("userId","token")
 );
 
 -- CreateTable
@@ -192,6 +201,12 @@ CREATE UNIQUE INDEX "_users_currentAddressId_key" ON "_users"("currentAddressId"
 CREATE INDEX "_users_email_idx" ON "_users"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "_user_sessions_userId_key" ON "_user_sessions"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_user_sessions_token_key" ON "_user_sessions"("token");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "_categories_name_key" ON "_categories"("name");
 
 -- CreateIndex
@@ -205,6 +220,9 @@ CREATE UNIQUE INDEX "_transactions_paymentId_key" ON "_transactions"("paymentId"
 
 -- AddForeignKey
 ALTER TABLE "_users" ADD CONSTRAINT "_users_currentAddressId_fkey" FOREIGN KEY ("currentAddressId") REFERENCES "_user_addresses"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_user_sessions" ADD CONSTRAINT "_user_sessions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "_users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_user_addresses" ADD CONSTRAINT "_user_addresses_userId_fkey" FOREIGN KEY ("userId") REFERENCES "_users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

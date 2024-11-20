@@ -13,6 +13,7 @@ import { TransactionModule } from './transaction/transaction.module';
 import { ReturnedOrderModule } from './returned-order/returned-order.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { HistoryModule } from './history/history.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { HistoryModule } from './history/history.module';
     ReturnedOrderModule,
     WishlistModule,
     HistoryModule,
+    CommonModule,
   ],
 })
 export class AppModule {}

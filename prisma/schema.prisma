@@ -20,6 +20,7 @@ model User {
   password              String
   isVerifiedAccount     Boolean                  @default(false)
   verifiedDate          DateTime?
+  verifiedToken         String?
   createdAt             DateTime                 @default(now())
   role                  UserRole
   credit                Float                    @default(0)
@@ -37,9 +38,19 @@ model User {
   payments              Payment[]                @relation("user_payment_relation")
   transactions          Transaction[]            @relation("transaction_user_relation")
   returnedOrders        ReturnedOrder[]          @relation("_returned_orders_customer")
+  sessions              UserSession?             @relation("user_session_relation")
 
   @@index([email])
   @@map("_users")
+}
+
+model UserSession {
+  userId Int    @unique
+  user   User   @relation(fields: [userId], references: [id], name: "user_session_relation")
+  token  String @unique
+
+  @@id([userId, token])
+  @@map("_user_sessions")
 }
 
 model UserAddress {
