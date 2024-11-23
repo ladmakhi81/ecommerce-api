@@ -8,5 +8,6 @@ import { ProductModule } from 'src/product/product.module';
   imports: [UserModule, ProductModule],
   controllers: [ProductPriceController],
   providers: [ProductPriceService],
+  exports: [ProductPriceService],
 })
 export class ProductPriceModule {}

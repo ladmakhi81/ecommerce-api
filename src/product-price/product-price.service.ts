@@ -43,12 +43,20 @@ export class ProductPriceService {
     });
   }
 
-  async findProductPriceItemById(id: number) {
+  async findProductPriceItemById(id: number, loadProduct = false) {
     const productPriceItem =
-      await this.prismaService.productPriceItem.findUnique({ where: { id } });
+      await this.prismaService.productPriceItem.findUnique({
+        where: { id },
+        include: { product: loadProduct },
+      });
     if (!productPriceItem) {
       throw new NotFoundException('Product Price Item Not Found');
     }
     return productPriceItem;
+  }
+
+  async calculatePriceByPriceItem(priceItemId: number) {
+    const priceItem = await this.findProductPriceItemById(priceItemId, true);
+    return priceItem.price + priceItem.product.basePrice;
   }
 }
