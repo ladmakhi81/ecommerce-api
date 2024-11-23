@@ -39,6 +39,5 @@ import { QueueModule } from './queue/queue.module';
     EventEmitterModule.forRoot(),
     QueueModule,
   ],
-  providers: [],
 })
 export class AppModule {}
