@@ -104,6 +104,7 @@ model Product {
   whishlists     ProductWhishlist[]       @relation("product_whish_list_relation")
   historyView    UserProductHistoryView[] @relation("product_history_view_relation")
   carts          Cart[]                   @relation("carts_product_relation")
+  priceItems     ProductPriceItem[]       @relation("product_price_list_relation")
 
   @@map("_products")
 }
@@ -119,8 +120,8 @@ model ProductPriceItem {
   price     Float
   isVisible Boolean
   type      ProductPriceType
-
-  carts Cart[] @relation("cart_price_item_relation")
+  productId Int
+  product   Product          @relation(fields: [productId], references: [id], name: "product_price_list_relation", onDelete: Cascade)
 
   @@map("_product_price_items")
 }
@@ -156,8 +157,7 @@ model Cart {
   productId Int
   product   Product @relation(fields: [productId], references: [id], name: "carts_product_relation")
 
-  priceItemId Int
-  priceItem   ProductPriceItem @relation(fields: [priceItemId], references: [id], name: "cart_price_item_relation")
+  price Float
 
   createdAt DateTime @default(now())
   quantity  Int
