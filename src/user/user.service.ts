@@ -88,4 +88,12 @@ export class UserService {
     }
     return user;
   }
+
+  async findUserById(id: number) {
+    const user = await this.prismaService.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User Not Found With This Id');
+    }
+    return user;
+  }
 }

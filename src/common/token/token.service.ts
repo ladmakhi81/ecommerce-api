@@ -21,6 +21,10 @@ export class TokenService {
     return token;
   }
 
+  verifyToken(token: string): DecodeAuthTokenDTO {
+    return this.jwtService.verify(token, { secret: this._getSecretKey() });
+  }
+
   generateVerificationToken() {
     return randomBytes(10).toString('hex');
   }

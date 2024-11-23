@@ -9,7 +9,9 @@ const bootstrap = async () => {
   const port = Number(configService.get('APP_PORT'));
 
   app.enableCors();
-  app.useGlobalPipes(new ValidationPipe({ stopAtFirstError: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({ stopAtFirstError: true, transform: true }),
+  );
   app.setGlobalPrefix('/api');
 
   await app.listen(port, async () => {
