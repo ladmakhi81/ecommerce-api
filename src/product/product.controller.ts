@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard, PaginationQuery } from 'src/common/decorators';
 import { AuthRequest, IPaginationQuery } from 'src/common/types';
-import { CreateProductDTO, UpdateProductDTO } from './dtos';
+import { CreateProductDTO, UpdateProductDTO, VerifyProductDTO } from './dtos';
 import { ProductService } from './product.service';
 
 @Controller('product')
@@ -24,13 +24,10 @@ export class ProductController {
     return this.productService.createProduct(req.user, dto);
   }
 
-  @Patch('verify/:id')
+  @Patch('verify')
   @AuthGuard()
-  verifyProductById(
-    @Param('id', ParseIntPipe) id: number,
-    @Req() req: AuthRequest,
-  ) {
-    return this.productService.verifyProductById(req.user, id);
+  verifyProductById(@Req() req: AuthRequest, @Body() dto: VerifyProductDTO) {
+    return this.productService.verifyProductById(dto, req.user);
   }
 
   @Delete(':id')

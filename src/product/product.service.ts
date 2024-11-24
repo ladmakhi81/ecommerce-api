@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateProductDTO, UpdateProductDTO } from './dtos';
+import { CreateProductDTO, UpdateProductDTO, VerifyProductDTO } from './dtos';
 import { Category, User } from '@prisma/client';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { CategoryService } from 'src/category/category.service';
@@ -21,6 +21,14 @@ export class ProductService {
     dto.category = (await this.categoryService.getCategoryById(
       dto.category as number,
     )) as Category;
+    if (!dto.category.isVerified) {
+      throw new BadRequestException(
+        'Your Category Should Verified By Admin First',
+      );
+    }
+    if (!dto.category.isPublished) {
+      throw new NotFoundException('Category Not Published Yet');
+    }
     return this.prismaService.product.create({
       data: {
         basePrice: dto.basePrice,
@@ -57,14 +65,15 @@ export class ProductService {
     });
   }
 
-  async verifyProductById(verifiedBy: User, productId: number) {
-    const product = await this.getProductById(productId);
+  async verifyProductById(dto: VerifyProductDTO, verifiedBy: User) {
+    const product = await this.getProductById(dto.productId);
     await this.prismaService.product.update({
       where: { id: product.id },
       data: {
         isVerified: true,
         verifiedById: verifiedBy.id,
         verifiedDate: new Date(),
+        fee: dto.fee,
       },
     });
   }

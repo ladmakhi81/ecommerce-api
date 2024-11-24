@@ -20,6 +20,12 @@ export class UserCartService {
   async addProductToUserCart(user: User, dto: AddProductToUserCart) {
     const product = await this.productService.getProductById(dto.productId);
 
+    if (!product.isVerified) {
+      throw new BadRequestException('Product Should Verified First');
+    }
+    if (!product.isPublished) {
+      throw new BadRequestException('Product Not Published Yet');
+    }
     const cart = await this._getCartByProductAndUser(
       product.id,
       user.id,

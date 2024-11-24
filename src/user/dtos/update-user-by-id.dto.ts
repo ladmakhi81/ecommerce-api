@@ -20,10 +20,6 @@ export class UpdateBaseUserInfoByIdDTO {
 
 export class UpdateUserByIdDTO extends UpdateBaseUserInfoByIdDTO {
   @IsOptional()
-  @IsNumber({ allowInfinity: false, allowNaN: false })
-  credit?: number;
-
-  @IsOptional()
   @IsDate()
   lastLoginDate?: Date;
 }

@@ -4,10 +4,12 @@ import { OrderController } from './order.controller';
 import { UserModule } from 'src/user/user.module';
 import { UserCartModule } from 'src/user-cart/user-cart.module';
 import { UserAddressModule } from 'src/user-address/user-address.module';
+import { PaymentModule } from 'src/payment/payment.module';
 
 @Module({
-  providers: [OrderService],
+  imports: [UserModule, UserCartModule, UserAddressModule, PaymentModule],
   controllers: [OrderController],
-  imports: [UserModule, UserCartModule, UserAddressModule],
+  providers: [OrderService],
+  exports: [OrderService],
 })
 export class OrderModule {}

@@ -17,6 +17,8 @@ import { CommonModule } from './common/common.module';
 import { NotificationModule } from './notification/notification.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { QueueModule } from './queue/queue.module';
+import { ZarinpalModule } from './zarinpal/zarinpal.module';
+import { VendorIncomeModule } from './vendor-income/vendor-income.module';
 
 @Module({
   imports: [
@@ -37,6 +39,8 @@ import { QueueModule } from './queue/queue.module';
     CommonModule,
     NotificationModule,
     EventEmitterModule.forRoot(),
+    ZarinpalModule,
+    VendorIncomeModule,
     QueueModule,
   ],
 })

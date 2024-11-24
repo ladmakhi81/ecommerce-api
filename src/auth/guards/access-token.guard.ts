@@ -32,6 +32,9 @@ export class AccessTokenGuard implements CanActivate {
     const loggedInUser = await this.userService.findUserById(
       verifiedToken.userId,
     );
+    if (!loggedInUser.isVerifiedAccount) {
+      throw new UnauthorizedException('You Need To Verify Your Account');
+    }
     request.user = loggedInUser;
     return true;
   }

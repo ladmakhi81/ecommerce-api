@@ -23,7 +23,6 @@ model User {
   verifiedToken         String?
   createdAt             DateTime                 @default(now())
   role                  UserRole
-  credit                Float                    @default(0)
   lastLoginDate         DateTime?
   addresses             UserAddress[]            @relation("user_address_relation")
   currentAddressId      Int?                     @unique
@@ -38,6 +37,7 @@ model User {
   transactions          Transaction[]            @relation("transaction_user_relation")
   returnedOrders        ReturnedOrder[]          @relation("_returned_orders_customer")
   sessions              UserSession?             @relation("user_session_relation")
+  incomes               VendorIncomes[]          @relation("income_vendor_relation")
 
   @@index([email])
   @@map("_users")
@@ -104,6 +104,8 @@ model Product {
   historyView    UserProductHistoryView[] @relation("product_history_view_relation")
   carts          Cart[]                   @relation("carts_product_relation")
   priceItems     ProductPriceItem[]       @relation("product_price_list_relation")
+  orderItems     OrderItem[]              @relation("order_item_product_relation")
+  fee            Float?
 
   @@map("_products")
 }
@@ -161,9 +163,6 @@ model Cart {
   createdAt DateTime @default(now())
   quantity  Int
 
-  orderId Int?
-  order   Order? @relation(fields: [orderId], references: [id], name: "cart_order_relation")
-
   @@map("_carts")
 }
 
@@ -174,9 +173,24 @@ enum OrderStatus {
   Delivered
 }
 
+model OrderItem {
+  id             Int            @id @default(autoincrement())
+  totalPrice     Float
+  finalPrice     Float
+  discountAmount Float
+  productId      Int
+  product        Product        @relation(fields: [productId], references: [id], name: "order_item_product_relation")
+  quantity       Int
+  orderId        Int
+  order          Order          @relation(fields: [orderId], references: [id], name: "order_items_relation")
+  vendorIncome   VendorIncomes? @relation("vendor_income_order_item_relation")
+
+  @@map("_orders_items")
+}
+
 model Order {
   id              Int         @id @default(autoincrement())
-  carts           Cart[]      @relation("cart_order_relation")
+  items           OrderItem[] @relation("order_items_relation")
   userId          Int
   user            User        @relation(fields: [userId], references: [id], name: "order_user_relation")
   totalPrice      Float
@@ -215,30 +229,55 @@ model Payment {
   order       Order         @relation(fields: [orderId], references: [id], name: "order_payment_relation")
   amount      Float
   transaction Transaction?  @relation("transaction_payment_relation")
+  authority   String
 
   @@map("_payments")
 }
 
 enum TransactionStatus {
-  Deposit
-  Withdraw
-  Revenue
+  Settle
   Return
 }
 
 model Transaction {
-  id         Int               @id @default(autoincrement())
-  createdAt  DateTime          @default(now())
-  status     TransactionStatus
-  authority  String
-  refId      String
-  amount     Float
-  paymentId  Int               @unique
-  payment    Payment           @relation(fields: [paymentId], references: [id], name: "transaction_payment_relation")
-  customerId Int
-  customer   User              @relation(fields: [customerId], references: [id], name: "transaction_user_relation")
+  id            Int               @id @default(autoincrement())
+  createdAt     DateTime          @default(now())
+  status        TransactionStatus
+  authority     String
+  refId         String
+  amount        Float
+  paymentId     Int               @unique
+  payment       Payment           @relation(fields: [paymentId], references: [id], name: "transaction_payment_relation")
+  customerId    Int
+  customer      User              @relation(fields: [customerId], references: [id], name: "transaction_user_relation")
+  vendorIncomes VendorIncomes[]   @relation("vendor_income_order_transaction_relation")
 
   @@map("_transactions")
+}
+
+enum VendorIncomeStatus {
+  Deposited
+  Saved
+  Canceled
+}
+
+model VendorIncomes {
+  id                 Int                @id @default(autoincrement())
+  createdAt          DateTime           @default(now())
+  status             VendorIncomeStatus @default(Saved)
+  amount             Float
+  finalAmount        Float
+  fee                Float
+  orderItemId        Int                @unique
+  orderItem          OrderItem          @relation(fields: [orderItemId], references: [id], name: "vendor_income_order_item_relation")
+  vendorId           Int
+  vendor             User               @relation(fields: [vendorId], references: [id], name: "income_vendor_relation")
+  isTransferToWallet Boolean            @default(false)
+  transferDate       DateTime?
+  transactionId      Int
+  transaction        Transaction        @relation(fields: [transactionId], references: [id], name: "vendor_income_order_transaction_relation")
+
+  @@map("_vendor_incomes")
 }
 
 enum ReturnedOrderStatus {
