@@ -7,5 +7,6 @@ import { UserModule } from 'src/user/user.module';
   providers: [UserAddressService],
   controllers: [UserAddressController],
   imports: [UserModule],
+  exports: [UserAddressService],
 })
 export class UserAddressModule {}

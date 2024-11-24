@@ -83,6 +83,28 @@ export class UserCartService {
     await this.prismaService.cart.delete({ where: { id: cart.id } });
   }
 
+  async getCartById(id: number) {
+    const cart = await this.prismaService.cart.findUnique({ where: { id } });
+    if (!cart) {
+      throw new NotFoundException('Cart Not Found');
+    }
+    return cart;
+  }
+
+  async getCartsByIds(ids: number[]) {
+    const carts = await this.prismaService.cart.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+    if (carts.length !== ids.length) {
+      throw new NotFoundException('Carts Not Found');
+    }
+    return carts;
+  }
+
   private async _getCartByProductAndUser(
     productId: number,
     customerId: number,

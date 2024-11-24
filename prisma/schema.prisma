@@ -34,7 +34,6 @@ model User {
   historyViews          UserProductHistoryView[] @relation("user_history_view_relation")
   carts                 Cart[]                   @relation("carts_user_relation")
   orders                Order[]                  @relation("order_user_relation")
-  vendorOrders          Order[]                  @relation("order_user_seller_relation")
   payments              Payment[]                @relation("user_payment_relation")
   transactions          Transaction[]            @relation("transaction_user_relation")
   returnedOrders        ReturnedOrder[]          @relation("_returned_orders_customer")
@@ -176,24 +175,23 @@ enum OrderStatus {
 }
 
 model Order {
-  id              Int             @id @default(autoincrement())
-  carts           Cart[]          @relation("cart_order_relation")
+  id              Int         @id @default(autoincrement())
+  carts           Cart[]      @relation("cart_order_relation")
   userId          Int
-  user            User            @relation(fields: [userId], references: [id], name: "order_user_relation")
+  user            User        @relation(fields: [userId], references: [id], name: "order_user_relation")
   totalPrice      Float
   finalPrice      Float
-  discountAmount  Float?          @default(0)
+  discountAmount  Float?      @default(0)
   userAddressId   Int
-  userAddress     UserAddress     @relation(fields: [userAddressId], references: [id], name: "order_user_address_relation")
+  userAddress     UserAddress @relation(fields: [userAddressId], references: [id], name: "order_user_address_relation")
   phoneNumber     String
-  createdAt       DateTime        @default(now())
+  createdAt       DateTime    @default(now())
   status          OrderStatus
   statusChangedAt DateTime
-  deliveryCode    String          @unique
-  sellerId        Int
-  seller          User            @relation(fields: [sellerId], references: [id], name: "order_user_seller_relation")
-  payments        Payment[]       @relation("order_payment_relation")
-  returnedOrders  ReturnedOrder[] @relation("returned_orders_relation")
+  deliveryCode    String      @unique
+
+  payments       Payment[]       @relation("order_payment_relation")
+  returnedOrders ReturnedOrder[] @relation("returned_orders_relation")
 
   @@index([deliveryCode])
   @@map("_orders")

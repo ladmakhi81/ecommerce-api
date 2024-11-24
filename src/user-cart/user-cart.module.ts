@@ -9,5 +9,6 @@ import { ProductPriceModule } from 'src/product-price/product-price.module';
   controllers: [UserCartController],
   providers: [UserCartService],
   imports: [UserModule, ProductModule, ProductPriceModule],
+  exports: [UserCartService],
 })
 export class UserCartModule {}

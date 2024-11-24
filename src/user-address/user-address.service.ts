@@ -33,7 +33,7 @@ export class UserAddressService {
     addressId: number,
     dto: UpdateAddressDTO,
   ) {
-    const address = await this._getAddressByIdAndCheckOwner(addressId, user);
+    const address = await this.getAddressByIdAndCheckOwner(addressId, user);
     if (dto.name) {
       await this._checkDuplicatedName(dto.name, addressId);
     }
@@ -44,14 +44,14 @@ export class UserAddressService {
   }
 
   async deleteAddressById(id: number, user: User) {
-    const address = await this._getAddressByIdAndCheckOwner(id, user);
+    const address = await this.getAddressByIdAndCheckOwner(id, user);
     if (address.userId !== user.id) {
       throw new BadRequestException('Only The Owner Of Address Can Delete It');
     }
     await this.prismaService.userAddress.delete({ where: { id: address.id } });
   }
 
-  private async _getAddressByIdAndCheckOwner(id: number, user: User) {
+  async getAddressByIdAndCheckOwner(id: number, user: User) {
     const address = await this.prismaService.userAddress.findUnique({
       where: { id },
     });
