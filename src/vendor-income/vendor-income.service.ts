@@ -7,7 +7,10 @@ import {
 import { CreateVendorIncomeDTO } from './dtos';
 import { OrderService } from 'src/order/order.service';
 import { PrismaService } from 'src/common/prisma/prisma.service';
-import { VendorIncomeNotification } from './notification-decorator';
+import {
+  CancelVendorIncomeNotification,
+  VendorIncomeNotification,
+} from './notification-decorator';
 import { InjectQueue } from '@nestjs/bullmq';
 import { QueueKeys } from 'src/queue/queue-keys.constant';
 import { Queue } from 'bullmq';
@@ -20,6 +23,8 @@ export class VendorIncomeService {
     private readonly orderService: OrderService,
     @InjectQueue(QueueKeys.VendorIncomeEmailQueue)
     public readonly vendorIncomeQueue: Queue,
+    @InjectQueue(QueueKeys.CancelVendorIncomeEmailQueue)
+    public readonly cancelVendorIncomeQueue: Queue,
   ) {}
 
   @VendorIncomeNotification()
@@ -40,6 +45,15 @@ export class VendorIncomeService {
       },
     });
     return income;
+  }
+
+  @CancelVendorIncomeNotification()
+  async cancelVendorIncomeForReturnedOrder(id: number) {
+    const income = await this.getVendorIncomeById(id);
+    await this.prismaService.vendorIncomes.update({
+      where: { id: income.id },
+      data: { isReturnedByCustomer: true },
+    });
   }
 
   async getVendorIncomeById(incomeId: number) {

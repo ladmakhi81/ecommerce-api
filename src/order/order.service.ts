@@ -86,7 +86,11 @@ export class OrderService {
   async getOrderItemById(orderItemId: number) {
     const orderItem = await this.prismaService.orderItem.findUnique({
       where: { id: orderItemId },
-      include: { product: { include: { createdBy: true } }, order: true },
+      include: {
+        product: { include: { createdBy: true } },
+        order: true,
+        returnedOrder: true,
+      },
     });
     if (!orderItem) {
       throw new NotFoundException('Order Item Not Found');

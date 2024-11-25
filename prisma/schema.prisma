@@ -186,6 +186,7 @@ model OrderItem {
   orderId        Int
   order          Order          @relation(fields: [orderId], references: [id], name: "order_items_relation")
   vendorIncome   VendorIncomes? @relation("vendor_income_order_item_relation")
+  returnedOrder  ReturnedOrder? @relation("returned_orders_relation")
 
   @@map("_orders_items")
 }
@@ -206,8 +207,7 @@ model Order {
   statusChangedAt DateTime
   deliveryCode    String?     @unique
 
-  payment        Payment?        @relation("order_payment_relation")
-  returnedOrders ReturnedOrder[] @relation("returned_orders_relation")
+  payment Payment? @relation("order_payment_relation")
 
   @@index([deliveryCode])
   @@map("_orders")
@@ -245,11 +245,11 @@ model Transaction {
   id            Int               @id @default(autoincrement())
   createdAt     DateTime          @default(now())
   status        TransactionStatus
-  authority     String
-  refId         String
+  authority     String?
+  refId         String?
   amount        Float
-  paymentId     Int               @unique
-  payment       Payment           @relation(fields: [paymentId], references: [id], name: "transaction_payment_relation")
+  paymentId     Int?              @unique
+  payment       Payment?          @relation(fields: [paymentId], references: [id], name: "transaction_payment_relation")
   customerId    Int
   customer      User              @relation(fields: [customerId], references: [id], name: "transaction_user_relation")
   vendorIncomes VendorIncomes[]   @relation("vendor_income_order_transaction_relation")
@@ -264,20 +264,21 @@ enum VendorIncomeStatus {
 }
 
 model VendorIncomes {
-  id                 Int                @id @default(autoincrement())
-  createdAt          DateTime           @default(now())
-  status             VendorIncomeStatus @default(Saved)
-  amount             Float
-  finalAmount        Float
-  fee                Float
-  orderItemId        Int                @unique
-  orderItem          OrderItem          @relation(fields: [orderItemId], references: [id], name: "vendor_income_order_item_relation")
-  vendorId           Int
-  vendor             User               @relation(fields: [vendorId], references: [id], name: "income_vendor_relation")
-  isTransferToWallet Boolean            @default(false)
-  transferDate       DateTime?
-  transactionId      Int
-  transaction        Transaction        @relation(fields: [transactionId], references: [id], name: "vendor_income_order_transaction_relation")
+  id                   Int                @id @default(autoincrement())
+  createdAt            DateTime           @default(now())
+  status               VendorIncomeStatus @default(Saved)
+  amount               Float
+  finalAmount          Float
+  fee                  Float
+  orderItemId          Int                @unique
+  orderItem            OrderItem          @relation(fields: [orderItemId], references: [id], name: "vendor_income_order_item_relation")
+  vendorId             Int
+  vendor               User               @relation(fields: [vendorId], references: [id], name: "income_vendor_relation")
+  isTransferToWallet   Boolean            @default(false)
+  transferDate         DateTime?
+  transactionId        Int
+  transaction          Transaction        @relation(fields: [transactionId], references: [id], name: "vendor_income_order_transaction_relation")
+  isReturnedByCustomer Boolean            @default(false)
 
   @@map("_vendor_incomes")
 }
@@ -296,8 +297,8 @@ model ReturnedOrder {
   status          ReturnedOrderStatus
   statusChangedAt DateTime
   reason          String
-  orderId         Int
-  order           Order               @relation(fields: [orderId], references: [id], name: "returned_orders_relation")
+  orderItemId     Int?                @unique
+  orderItem       OrderItem?          @relation(fields: [orderItemId], references: [id], name: "returned_orders_relation")
   customerId      Int
   customer        User                @relation(fields: [customerId], references: [id], name: "_returned_orders_customer")
 

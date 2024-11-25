@@ -8,6 +8,7 @@ import { QueueKeys } from 'src/queue/queue-keys.constant';
   imports: [
     OrderModule,
     BullModule.registerQueue({ name: QueueKeys.VendorIncomeEmailQueue }),
+    BullModule.registerQueue({ name: QueueKeys.CancelVendorIncomeEmailQueue }),
   ],
   providers: [VendorIncomeService],
   exports: [VendorIncomeService],
