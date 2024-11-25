@@ -1,8 +1,8 @@
-import { Body, Controller, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Req } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { SubmitOrderDTO, UpdateOrderStatusDTO } from './dtos';
-import { AuthGuard } from 'src/common/decorators';
-import { AuthRequest } from 'src/common/types';
+import { AuthGuard, PaginationQuery } from 'src/common/decorators';
+import { AuthRequest, IPaginationQuery } from 'src/common/types';
 
 @Controller('order')
 export class OrderController {
@@ -18,5 +18,11 @@ export class OrderController {
   @AuthGuard()
   updateOrderStatus(@Body() dto: UpdateOrderStatusDTO) {
     return this.orderService.updateOrderStatus(dto);
+  }
+
+  @Get()
+  @AuthGuard()
+  getOrders(@PaginationQuery() { limit, page }: IPaginationQuery) {
+    return this.orderService.getOrders(page, limit);
   }
 }

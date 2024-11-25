@@ -130,6 +130,17 @@ export class OrderService {
     });
   }
 
+  async getOrders(page: number, limit: number) {
+    const content = await this.prismaService.order.findMany({
+      skip: page * limit,
+      take: limit,
+      include: { payment: true, items: true, user: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    const count = await this.prismaService.order.count();
+    return { content, count };
+  }
+
   private _generateDeliveryCode() {
     return randomBytes(20).toString('hex');
   }
