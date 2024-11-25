@@ -8,6 +8,9 @@ import { ForgetPasswordEmailQueueProcessorService } from './auth-queue-services/
 import { VerifyAccountEmailQueueProcessorService } from './auth-queue-services/verify-account-email-queue-processor.service';
 import { CalculateVendorIncomeQueueProcessorService } from './vendor-queue-services/calculate-vendor-income-queue-processor.service';
 import { VendorIncomeModule } from 'src/vendor-income/vendor-income.module';
+import { VendorIncomeEmailQueueProcessorService } from './vendor-queue-services/vendor-income-email-queue-processor.service';
+import { CustomerSubmitOrderEmailQueueProcessor } from './order-queue-services/customer-submit-order-email-queue-processor.service';
+import { OrderModule } from 'src/order/order.module';
 
 @Module({
   imports: [
@@ -23,6 +26,7 @@ import { VendorIncomeModule } from 'src/vendor-income/vendor-income.module';
     }),
     UserModule,
     VendorIncomeModule,
+    OrderModule,
   ],
   providers: [
     LoginEmailQueueProcessorService,
@@ -30,6 +34,8 @@ import { VendorIncomeModule } from 'src/vendor-income/vendor-income.module';
     ForgetPasswordEmailQueueProcessorService,
     VerifyAccountEmailQueueProcessorService,
     CalculateVendorIncomeQueueProcessorService,
+    VendorIncomeEmailQueueProcessorService,
+    CustomerSubmitOrderEmailQueueProcessor,
   ],
 })
 export class QueueModule {}

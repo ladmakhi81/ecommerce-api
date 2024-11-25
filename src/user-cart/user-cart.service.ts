@@ -111,6 +111,16 @@ export class UserCartService {
     return carts;
   }
 
+  async deleteCartsByIds(ids: number[]) {
+    const carts = await this.prismaService.cart.findMany({
+      where: { id: { in: ids } },
+    });
+    if (carts.length !== ids.length) {
+      throw new NotFoundException('Cart Not Found');
+    }
+    await this.prismaService.cart.deleteMany({ where: { id: { in: ids } } });
+  }
+
   private async _getCartByProductAndUser(
     productId: number,
     customerId: number,

@@ -1,7 +1,16 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateVendorIncomeDTO } from './dtos';
 import { OrderService } from 'src/order/order.service';
 import { PrismaService } from 'src/common/prisma/prisma.service';
+import { VendorIncomeNotification } from './notification-decorator';
+import { InjectQueue } from '@nestjs/bullmq';
+import { QueueKeys } from 'src/queue/queue-keys.constant';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class VendorIncomeService {
@@ -9,8 +18,11 @@ export class VendorIncomeService {
     private readonly prismaService: PrismaService,
     @Inject(forwardRef(() => OrderService))
     private readonly orderService: OrderService,
+    @InjectQueue(QueueKeys.VendorIncomeEmailQueue)
+    public readonly vendorIncomeQueue: Queue,
   ) {}
 
+  @VendorIncomeNotification()
   async createVendorIncome(dto: CreateVendorIncomeDTO) {
     const orderItem = await this.orderService.getOrderItemById(dto.orderItemId);
     const vendor = orderItem.product.createdBy;
@@ -27,8 +39,17 @@ export class VendorIncomeService {
         transactionId: dto.transactionId,
       },
     });
-    // send notification to vendor
-    // send notification to super admin
+    return income;
+  }
+
+  async getVendorIncomeById(incomeId: number) {
+    const income = await this.prismaService.vendorIncomes.findUnique({
+      where: { id: incomeId },
+      include: { vendor: true },
+    });
+    if (!income) {
+      throw new NotFoundException('Income Not Found');
+    }
     return income;
   }
 }

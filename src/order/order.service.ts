@@ -3,13 +3,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { SubmitOrderDTO } from './dtos';
-import { OrderStatus, User } from '@prisma/client';
+import { SubmitOrderDTO, UpdateOrderStatusDTO } from './dtos';
+import { OrderStatus, PaymentStatus, User } from '@prisma/client';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { UserCartService } from 'src/user-cart/user-cart.service';
 import { UserAddressService } from 'src/user-address/user-address.service';
 import { randomBytes } from 'crypto';
 import { PaymentService } from 'src/payment/payment.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { QueueKeys } from 'src/queue/queue-keys.constant';
+import { Queue } from 'bullmq';
+import { CustomerSaveOrderNotification } from './notification-decorator';
 
 @Injectable()
 export class OrderService {
@@ -18,8 +22,11 @@ export class OrderService {
     private readonly cartsService: UserCartService,
     private readonly userAddressService: UserAddressService,
     private readonly paymentService: PaymentService,
+    @InjectQueue(QueueKeys.SubmitCustomerOrderEmailQueue)
+    public readonly submitCustomerOrderQueue: Queue,
   ) {}
 
+  @CustomerSaveOrderNotification()
   async submitOrder(customer: User, dto: SubmitOrderDTO) {
     if (!dto.userAddressId && !customer.currentAddressId) {
       throw new BadRequestException(
@@ -39,7 +46,6 @@ export class OrderService {
 
     const order = await this.prismaService.order.create({
       data: {
-        deliveryCode: this._generateDeliveryCode(),
         finalPrice: totalPrice,
         totalPrice,
         phoneNumber: dto.phoneNumber,
@@ -66,6 +72,8 @@ export class OrderService {
       ),
     );
 
+    await this.cartsService.deleteCartsByIds(dto.cartIds);
+
     const payLink = await this.paymentService.createPayment({
       amount: totalPrice,
       order,
@@ -84,6 +92,42 @@ export class OrderService {
       throw new NotFoundException('Order Item Not Found');
     }
     return orderItem;
+  }
+
+  async getOrderById(orderId: number) {
+    const order = await this.prismaService.order.findUnique({
+      where: { id: orderId },
+      include: { payment: true, user: true, userAddress: true },
+    });
+    if (!order) {
+      throw new NotFoundException('Order Not Found');
+    }
+    return order;
+  }
+
+  async updateOrderStatus(dto: UpdateOrderStatusDTO) {
+    const order = await this.getOrderById(dto.id);
+
+    if (order.payment?.status !== PaymentStatus.Payed) {
+      throw new BadRequestException(
+        'You Can Change Order Status That Settled By Customer',
+      );
+    }
+    const baseUpdatePayload = {
+      status: dto.status,
+      statusChangedAt: new Date(),
+    };
+
+    await this.prismaService.order.update({
+      where: { id: order.id },
+      data:
+        dto.status === OrderStatus.OutOfDelivery
+          ? {
+              deliveryCode: this._generateDeliveryCode(),
+              ...baseUpdatePayload,
+            }
+          : baseUpdatePayload,
+    });
   }
 
   private _generateDeliveryCode() {

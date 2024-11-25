@@ -202,9 +202,9 @@ model Order {
   createdAt       DateTime    @default(now())
   status          OrderStatus
   statusChangedAt DateTime
-  deliveryCode    String      @unique
+  deliveryCode    String?     @unique
 
-  payments       Payment[]       @relation("order_payment_relation")
+  payment        Payment?        @relation("order_payment_relation")
   returnedOrders ReturnedOrder[] @relation("returned_orders_relation")
 
   @@index([deliveryCode])
@@ -225,8 +225,8 @@ model Payment {
   status      PaymentStatus
   userId      Int
   user        User          @relation(fields: [userId], references: [id], name: "user_payment_relation")
-  orderId     Int
-  order       Order         @relation(fields: [orderId], references: [id], name: "order_payment_relation")
+  orderId     Int?          @unique
+  order       Order?        @relation(fields: [orderId], references: [id], name: "order_payment_relation")
   amount      Float
   transaction Transaction?  @relation("transaction_payment_relation")
   authority   String

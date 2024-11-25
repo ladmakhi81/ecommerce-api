@@ -4,4 +4,6 @@ export enum QueueKeys {
   'ForgetPasswordEmailQueue' = 'ForgetPasswordEmailQueue',
   'VerifyAccountEmailQueue' = 'VerifyAccountEmailQueue',
   'CalculateVendorIncomeQueue' = 'CalculateVendorIncomeQueue',
+  'VendorIncomeEmailQueue' = 'VendorIncomeEmailQueue',
+  'SubmitCustomerOrderEmailQueue' = 'SubmitCustomerOrderEmailQueue',
 }

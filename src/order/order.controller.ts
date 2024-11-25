@@ -1,6 +1,6 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Patch, Post, Req } from '@nestjs/common';
 import { OrderService } from './order.service';
-import { SubmitOrderDTO } from './dtos';
+import { SubmitOrderDTO, UpdateOrderStatusDTO } from './dtos';
 import { AuthGuard } from 'src/common/decorators';
 import { AuthRequest } from 'src/common/types';
 
@@ -12,5 +12,11 @@ export class OrderController {
   @AuthGuard()
   submitOrder(@Body() dto: SubmitOrderDTO, @Req() { user }: AuthRequest) {
     return this.orderService.submitOrder(user, dto);
+  }
+
+  @Patch('update-status')
+  @AuthGuard()
+  updateOrderStatus(@Body() dto: UpdateOrderStatusDTO) {
+    return this.orderService.updateOrderStatus(dto);
   }
 }

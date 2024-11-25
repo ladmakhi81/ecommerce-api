@@ -12,6 +12,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { QueueKeys } from 'src/queue/queue-keys.constant';
 import { Queue } from 'bullmq';
 import { CalculateVendorIncomeQueuePayloadDTO } from 'src/queue/vendor-queue-services/calculate-vendor-income-queue-processor.service';
+import * as moment from 'moment';
 
 @Injectable()
 export class PaymentService {
@@ -72,6 +73,18 @@ export class PaymentService {
       throw new NotFoundException('Payment Not Found');
     }
     return payment;
+  }
+
+  changeCanceablePaymentStatusToCancel() {
+    return this.prismaService.payment.updateMany({
+      where: {
+        createdAt: { lt: moment().subtract(30, 'minute').toISOString() },
+        status: PaymentStatus.NotPayed,
+      },
+      data: {
+        status: PaymentStatus.Canceled,
+      },
+    });
   }
 
   private async _payThePayment(id: number) {

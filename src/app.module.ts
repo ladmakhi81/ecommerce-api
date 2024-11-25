@@ -19,6 +19,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { QueueModule } from './queue/queue.module';
 import { ZarinpalModule } from './zarinpal/zarinpal.module';
 import { VendorIncomeModule } from './vendor-income/vendor-income.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { VendorIncomeModule } from './vendor-income/vendor-income.module';
     ZarinpalModule,
     VendorIncomeModule,
     QueueModule,
+    ScheduleModule.forRoot(),
   ],
 })
 export class AppModule {}

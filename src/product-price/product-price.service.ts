@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { CreateProductPriceItemDTO, UpdateProductPriceItemDTO } from './dtos';
 import { ProductService } from 'src/product/product.service';
@@ -12,6 +16,12 @@ export class ProductPriceService {
   ) {}
 
   async createPriceItem(dto: CreateProductPriceItemDTO) {
+    await this._checkDuplicatedRecord(
+      dto.title,
+      dto.value,
+      dto.product as number,
+    );
+
     dto.product = (await this.productService.getProductById(
       dto.product as number,
     )) as Product;
@@ -30,6 +40,14 @@ export class ProductPriceService {
 
   async updateProductPriceItemById(id: number, dto: UpdateProductPriceItemDTO) {
     const priceItem = await this.findProductPriceItemById(id);
+    if (dto.title || dto.value) {
+      await this._checkDuplicatedRecord(
+        dto.title || priceItem.title,
+        dto.value || priceItem.value,
+        priceItem.productId,
+        id,
+      );
+    }
     await this.prismaService.productPriceItem.update({
       where: { id: priceItem.id },
       data: { ...dto },
@@ -58,5 +76,32 @@ export class ProductPriceService {
   async calculatePriceByPriceItem(priceItemId: number) {
     const priceItem = await this.findProductPriceItemById(priceItemId, true);
     return priceItem.price + priceItem.product.basePrice;
+  }
+
+  private async _checkDuplicatedRecord(
+    title: string,
+    value: string,
+    productId: number,
+    priceItemId?: number,
+  ) {
+    const priceItem = await this.prismaService.productPriceItem.findFirst({
+      where:
+        typeof priceItemId === typeof undefined
+          ? {
+              value,
+              title,
+              productId,
+            }
+          : {
+              value,
+              title,
+              productId,
+              NOT: { id: priceItemId },
+            },
+    });
+
+    if (priceItem) {
+      throw new ConflictException('Price Item Record Already Exist');
+    }
   }
 }
