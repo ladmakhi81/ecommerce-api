@@ -46,4 +46,12 @@ export class UpdateProductDTO {
   @IsOptional()
   @IsObject()
   meta?: Record<string, any>;
+
+  @IsOptional()
+  @IsBoolean()
+  hasReturnedOrderOption?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  returnedOrderOptionLimitDay?: number;
 }

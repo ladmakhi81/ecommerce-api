@@ -83,29 +83,31 @@ model Category {
 }
 
 model Product {
-  id             Int                      @id @default(autoincrement())
-  name           String
-  isPublished    Boolean                  @default(false)
-  isVerified     Boolean                  @default(false)
-  verifiedDate   DateTime?
-  verifiedById   Int?
-  verifiedByUser User?                    @relation(fields: [verifiedById], references: [id], name: "verified_by_user_relation")
-  createdAt      DateTime                 @default(now())
-  createdById    Int
-  createdBy      User                     @relation(fields: [createdById], references: [id], name: "products_created_relation")
-  basePrice      Float
-  categoryId     Int
-  category       Category                 @relation(fields: [categoryId], references: [id], name: "product_category_relation")
-  description    String
-  images         String[]                 @default([])
-  previewImage   String
-  meta           Json
-  whishlists     ProductWhishlist[]       @relation("product_whish_list_relation")
-  historyView    UserProductHistoryView[] @relation("product_history_view_relation")
-  carts          Cart[]                   @relation("carts_product_relation")
-  priceItems     ProductPriceItem[]       @relation("product_price_list_relation")
-  orderItems     OrderItem[]              @relation("order_item_product_relation")
-  fee            Float?
+  id                          Int                      @id @default(autoincrement())
+  name                        String
+  isPublished                 Boolean                  @default(false)
+  isVerified                  Boolean                  @default(false)
+  verifiedDate                DateTime?
+  verifiedById                Int?
+  verifiedByUser              User?                    @relation(fields: [verifiedById], references: [id], name: "verified_by_user_relation")
+  createdAt                   DateTime                 @default(now())
+  createdById                 Int
+  createdBy                   User                     @relation(fields: [createdById], references: [id], name: "products_created_relation")
+  basePrice                   Float
+  categoryId                  Int
+  category                    Category                 @relation(fields: [categoryId], references: [id], name: "product_category_relation")
+  description                 String
+  images                      String[]                 @default([])
+  previewImage                String
+  meta                        Json
+  whishlists                  ProductWhishlist[]       @relation("product_whish_list_relation")
+  historyView                 UserProductHistoryView[] @relation("product_history_view_relation")
+  carts                       Cart[]                   @relation("carts_product_relation")
+  priceItems                  ProductPriceItem[]       @relation("product_price_list_relation")
+  orderItems                  OrderItem[]              @relation("order_item_product_relation")
+  fee                         Float?
+  hasReturnedOrderOption      Boolean
+  returnedOrderOptionLimitDay Int                      @default(0)
 
   @@map("_products")
 }

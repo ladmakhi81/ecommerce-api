@@ -40,6 +40,8 @@ export class ProductService {
         createdById: creator.id,
         images: dto.images,
         isPublished: dto.isPublished,
+        hasReturnedOrderOption: dto.hasReturnedOrderOption,
+        returnedOrderOptionLimitDay: dto.returnedOrderOptionLimitDay,
       },
     });
   }

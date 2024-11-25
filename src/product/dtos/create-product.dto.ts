@@ -6,6 +6,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsObject,
+  IsOptional,
   IsString,
   MinLength,
 } from 'class-validator';
@@ -46,4 +47,12 @@ export class CreateProductDTO {
   @IsNotEmpty()
   @IsObject()
   meta: Record<string, any>;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  hasReturnedOrderOption: boolean;
+
+  @IsOptional()
+  @IsInt()
+  returnedOrderOptionLimitDay?: number;
 }
