@@ -72,6 +72,10 @@ export class UserAddressService {
     return address;
   }
 
+  getUserAddresses(userId: number) {
+    return this.prismaService.userAddress.findMany({ where: { userId } });
+  }
+
   private async _checkDuplicatedName(
     name: string,
     userId: number,

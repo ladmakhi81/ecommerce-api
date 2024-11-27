@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   ParseIntPipe,
   Patch,
@@ -24,7 +25,6 @@ export class UserAddressController {
   }
 
   @Patch('user/set-current-address/:address')
-  @AuthGuard()
   setCurrentAddressUser(
     @Param('address', ParseIntPipe) address: number,
     @Req() { user }: AuthRequest,
@@ -47,5 +47,10 @@ export class UserAddressController {
     @Body() dto: UpdateAddressDTO,
   ) {
     return this.userAddressService.updateAddressById(req.user, id, dto);
+  }
+
+  @Get('own')
+  getUserAddresses(@Req() { user }: AuthRequest) {
+    return this.userAddressService.getUserAddresses(user.id);
   }
 }
