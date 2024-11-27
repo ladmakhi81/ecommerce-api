@@ -23,6 +23,15 @@ export class UserAddressController {
     return this.userAddressService.createAddress(req.user, dto);
   }
 
+  @Patch('user/set-current-address/:address')
+  @AuthGuard()
+  setCurrentAddressUser(
+    @Param('address', ParseIntPipe) address: number,
+    @Req() { user }: AuthRequest,
+  ) {
+    return this.userAddressService.updateUserCurrentAddress(user, address);
+  }
+
   @Delete(':id')
   deleteUserAddressById(
     @Param('id', ParseIntPipe) id: number,
